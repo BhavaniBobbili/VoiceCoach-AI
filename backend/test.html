@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Backend Test</title>
+</head>
+<body>
+
+<h1>Interview Analysis Test</h1>
+
+<input type="file" id="audio" />
+<button onclick="sendAudio()">Analyze</button>
+
+<hr>
+
+<h2>Transcript</h2>
+<p id="transcript"></p>
+
+<h2>Metrics</h2>
+<p>WPM: <span id="wpm"></span></p>
+<p>Confidence: <span id="confidence"></span></p>
+<p>Clarity: <span id="clarity"></span></p>
+<p>Total Words: <span id="total_words"></span></p>
+<p>Total Filler Words: <span id="filler_total"></span></p>
+
+<h2>Filler Breakdown</h2>
+<pre id="filler_breakdown"></pre>
+
+<h2>AI Feedback</h2>
+<pre id="feedback"></pre>
+
+<script>
+async function sendAudio() {
+  const fileInput = document.getElementById("audio");
+  if (!fileInput.files.length) {
+    alert("Upload audio first");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("audio", fileInput.files[0]);
+  formData.append("duration", 60);
+
+  const res = await fetch("http://127.0.0.1:5000/analyze", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+  console.log("BACKEND RESPONSE:", data);
+
+  // 🔑 THIS IS WHERE DATA IS SHOWN
+  document.getElementById("transcript").innerText = data.raw_transcript;
+  document.getElementById("wpm").innerText = data.metrics.wpm;
+  document.getElementById("confidence").innerText = data.metrics.confidence;
+  document.getElementById("clarity").innerText = data.metrics.clarity;
+  document.getElementById("total_words").innerText = data.metrics.total_words;
+  document.getElementById("filler_total").innerText = data.metrics.filler_total;
+  document.getElementById("filler_breakdown").innerText =
+    JSON.stringify(data.metrics.filler_breakdown, null, 2);
+  document.getElementById("feedback").innerText = data.ai_feedback;
+}
+</script>
+
+</body>
+</html>
